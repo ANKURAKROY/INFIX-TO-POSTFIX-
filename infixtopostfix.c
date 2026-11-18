@@ -1,0 +1,116 @@
+#include<stdio.h>
+#include<ctype.h>
+
+typedef struct conversion
+{
+    char a[50];
+    int top;
+}stack;
+
+void push(stack*,char);
+char pop(stack*);
+void convert(char[],char[]);
+int priority(char);
+
+int main()
+{
+    char infix[50], postfix[50];
+
+    printf("\nENTER INFIX EXPRESSION:\n ");
+    scanf("%49s", infix);
+
+    convert(infix,postfix);
+
+    printf("\nPOSTFIX EXPRESSION:\n%s\n", postfix);
+
+    return 0;
+}
+
+void convert(char in[50], char post[50])
+{
+    char opr;
+    stack s1;
+    int j=0,i;
+
+    s1.top = -1;
+
+    for(i=0;in[i]!='\0';i++)
+    {
+        if(isalpha((unsigned char)in[i]))
+            post[j++]=in[i];
+
+        if(in[i]=='(')
+            push(&s1,in[i]);
+
+        if(in[i]=='+'||in[i]=='-'||in[i]=='/'||in[i]=='*'||in[i]=='$')
+        {
+            if(s1.top!=-1)
+            {
+                opr=pop(&s1);
+
+                while(s1.top!=-1 && priority(opr)>=priority(in[i]))
+                {
+                    post[j++]=opr;
+                    opr=pop(&s1);
+                }
+
+                if(opr!=0)
+                    push(&s1,opr);
+
+                push(&s1,in[i]);
+            }
+            else
+                push(&s1,in[i]);
+        }
+
+        if(in[i]==')')
+        {
+            opr=pop(&s1);
+
+            while(opr!='(' && opr!=0)
+            {
+                post[j++]=opr;
+                opr=pop(&s1);
+            }
+        }
+    }
+
+    while(s1.top!=-1)
+        post[j++]=pop(&s1);
+
+    post[j]='\0';
+}
+
+int priority(char c)
+{
+    if(c=='$')
+        return 3;
+
+    if(c=='*'||c=='/')
+        return 2;
+
+    if(c=='+'||c=='-')
+        return 1;
+
+    else
+        return 0;
+}
+
+void push(stack *s, char opr)
+{
+    s->top++;
+    s->a[s->top]=opr;
+}
+
+char pop(stack *s)
+{
+    if(s->top==-1)
+    {
+        return 0;
+    }
+    else
+    {
+        char data=s->a[s->top--];
+        return data;
+    }
+}
